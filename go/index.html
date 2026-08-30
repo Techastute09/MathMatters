@@ -1,0 +1,69 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <!--
+        ============================================
+        Math Matters Permanent QR Redirect
+        ============================================
+
+        IMPORTANT:
+        Only change the URL below when your actual
+        Math Matters website changes.
+
+        The QR code itself NEVER needs to change.
+    -->
+
+    <meta http-equiv="refresh"
+          content="0; url=https://techastute09.github.io/MathMatters/">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Math Matters</title>
+
+    <script>
+        // ==========================================
+        // CHANGE ONLY THIS URL WHEN YOUR SITE MOVES
+        // ==========================================
+
+        const TARGET_URL = "https://techastute09.github.io/MathMatters/";
+
+        // Redirect immediately
+        window.location.replace(TARGET_URL);
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 60px 20px;
+            color: #333;
+        }
+
+        a {
+            color: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Math Matters</h2>
+
+    <p>Redirecting...</p>
+
+    <p>
+        If you are not redirected automatically,
+        <a id="manualLink" href="#">click here</a>.
+    </p>
+
+    <script>
+        document.getElementById("manualLink").href = TARGET_URL;
+    </script>
+
+</body>
+</html>
+```

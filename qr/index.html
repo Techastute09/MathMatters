@@ -1,0 +1,331 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Math Matters QR Code Generator</title>
+
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f5f7fb;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+
+            background: white;
+
+            padding: 40px;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 8px 30px rgba(0, 0, 0, 0.08);
+
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+
+            color: #1f2937;
+        }
+
+        .subtitle {
+            color: #6b7280;
+
+            margin-bottom: 30px;
+
+            line-height: 1.6;
+        }
+
+        label {
+            display: block;
+
+            text-align: left;
+
+            margin-bottom: 8px;
+
+            font-weight: bold;
+
+            color: #374151;
+        }
+
+        input {
+            width: 100%;
+
+            padding: 14px;
+
+            border: 1px solid #d1d5db;
+
+            border-radius: 8px;
+
+            font-size: 16px;
+
+            margin-bottom: 16px;
+        }
+
+        input:focus {
+            outline: none;
+
+            border-color: #2563eb;
+        }
+
+        button {
+            width: 100%;
+
+            padding: 14px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #2563eb;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        #qrcode {
+            margin: 30px auto;
+
+            display: flex;
+
+            justify-content: center;
+        }
+
+        #result {
+            display: none;
+        }
+
+        .qr-url {
+            word-break: break-all;
+
+            background: #f3f4f6;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+
+            color: #4b5563;
+
+            margin-bottom: 16px;
+        }
+
+        .download-button {
+            display: inline-block;
+
+            padding: 12px 20px;
+
+            border-radius: 8px;
+
+            background: #111827;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .info {
+            margin-top: 30px;
+
+            padding: 16px;
+
+            background: #eff6ff;
+
+            border-radius: 8px;
+
+            text-align: left;
+
+            color: #374151;
+
+            line-height: 1.6;
+
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Math Matters</h1>
+
+    <div class="subtitle">
+        QR Code Generator
+    </div>
+
+    <label for="url">
+        Website URL
+    </label>
+
+    <input
+        id="url"
+        type="url"
+        placeholder="https://example.com"
+        value="https://techastute09.github.io/MathMatters/go/"
+    >
+
+    <button onclick="generateQRCode()">
+        Generate QR Code
+    </button>
+
+    <div id="result">
+
+        <div id="qrcode"></div>
+
+        <div class="qr-url" id="displayUrl"></div>
+
+        <a
+            id="downloadButton"
+            class="download-button"
+            href="#"
+            download="math-matters-qr-code.png">
+            Download QR Code
+        </a>
+
+    </div>
+
+    <div class="info">
+
+        <strong>Permanent QR Code Tip</strong>
+
+        <br><br>
+
+        For Math Matters, you should normally generate
+        the QR code using your permanent
+        <strong>/go/</strong> URL.
+
+        <br><br>
+
+        Example:
+
+        <br>
+
+        <code>
+        https://techastute09.github.io/MathMatters/go/
+        </code>
+
+        <br><br>
+
+        If your actual website changes later,
+        simply update <code>go/index.html</code>.
+        The QR code does not need to be regenerated.
+
+    </div>
+
+</div>
+
+
+<script>
+
+function generateQRCode() {
+
+    const urlInput =
+        document.getElementById("url");
+
+    const url =
+        urlInput.value.trim();
+
+    if (!url) {
+
+        alert("Please enter a URL.");
+
+        return;
+    }
+
+    // Clear previous QR code
+    const qrContainer =
+        document.getElementById("qrcode");
+
+    qrContainer.innerHTML = "";
+
+    // Generate QR code
+    new QRCode(qrContainer, {
+
+        text: url,
+
+        width: 256,
+
+        height: 256,
+
+        correctLevel:
+            QRCode.CorrectLevel.H
+
+    });
+
+    // Show URL
+    document.getElementById(
+        "displayUrl"
+    ).textContent = url;
+
+    // Show result
+    document.getElementById(
+        "result"
+    ).style.display = "block";
+
+    // Wait for QR image to be generated
+    setTimeout(function () {
+
+        const qrImage =
+            qrContainer.querySelector("img");
+
+        if (qrImage) {
+
+            document.getElementById(
+                "downloadButton"
+            ).href = qrImage.src;
+
+        }
+
+    }, 300);
+
+}
+
+</script>
+
+</body>
+</html>
+```
