@@ -12,6 +12,44 @@
     >
 
     <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* Events pagination — scoped additions, matches the dark events section */
+        .event-pager {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 32px;
+        }
+        .button-outline-light {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            border-radius: 999px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .button-outline-light:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .button-outline-light:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+        .event-pager-info {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+        .events-loading,
+        .events-empty,
+        .events-error {
+            color: rgba(255, 255, 255, 0.6);
+            padding: 24px 0;
+        }
+    </style>
 </head>
 
 <body>
@@ -213,7 +251,7 @@
 
             </p>
 
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfyKck4XeUN5jFFBYPeYqJQVbFEY15m_czJWydrqWbbOv5A6w/viewform" class="text-link">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSe_irymWaJjduh1n5V9N_3BrLPSkRgrChb4AfYmm55lFmyGVQ/viewform" class="text-link">
                 Register for tutoring →
             </a>
 
@@ -484,115 +522,22 @@
                 </h2>
 
             </div>
-
-            <a href="#join" class="button button-light">
+        <!-- 
+            <a href="#" class="button button-light" id="register-event-link" target="_blank" rel="noopener">
                 Register for an Event
             </a>
-
+        -->
         </div>
 
 
-        <div class="event-list">
+        <div class="event-list" id="events-list">
+            <p class="events-loading">Loading events…</p>
+        </div>
 
-
-            <div class="event">
-
-                <div class="event-date">
-
-                    <strong>17</strong>
-                    <span>OCT</span>
-
-                </div>
-
-                <div class="event-info">
-
-                    <span class="event-tag">
-                        WORKSHOP
-                    </span>
-
-                    <h3>
-                        The Mathematics Behind AI
-                    </h3>
-
-                    <p>
-                        Explore patterns, vectors, probability,
-                        and how computers learn.
-                    </p>
-
-                </div>
-
-                <div class="event-time">
-                    2:00 PM
-                </div>
-
-            </div>
-
-
-            <div class="event">
-
-                <div class="event-date">
-
-                    <strong>25</strong>
-                    <span>OCT</span>
-
-                </div>
-
-                <div class="event-info">
-
-                    <span class="event-tag">
-                        CHALLENGE
-                    </span>
-
-                    <h3>
-                        October Math Challenge
-                    </h3>
-
-                    <p>
-                        A creative problem-solving challenge
-                        for middle school students.
-                    </p>
-
-                </div>
-
-                <div class="event-time">
-                    Online
-                </div>
-
-            </div>
-
-
-            <div class="event">
-
-                <div class="event-date">
-
-                    <strong>08</strong>
-                    <span>NOV</span>
-
-                </div>
-
-                <div class="event-info">
-
-                    <span class="event-tag">
-                        SPEAKER
-                    </span>
-
-                    <h3>
-                        How Mathematicians Solve Problems
-                    </h3>
-
-                    <p>
-                        A conversation with a mathematics educator.
-                    </p>
-
-                </div>
-
-                <div class="event-time">
-                    3:00 PM
-                </div>
-
-            </div>
-
-
+        <div class="event-pager" id="event-pager" style="display:none;">
+            <button type="button" id="events-prev-btn" class="button button-outline-light">← Prev</button>
+            <span class="event-pager-info" id="events-page-info"></span>
+            <button type="button" id="events-next-btn" class="button button-outline-light">Next →</button>
         </div>
 
     </div>
@@ -1026,6 +971,107 @@
 
 
 <script src="js/script.js"></script>
+
+<!-- =========================
+     EVENTS: Google Sheet feed + pagination
+========================= -->
+<script>
+(function () {
+    // Paste the deployed Apps Script Web App URL from EventsAPI.gs here
+    const EVENTS_API_URL = "https://script.google.com/macros/s/1RNnzJLMD8rdnVZ-w-GifjuxVci5i_6AFV34cvO4yElQ/exec";
+    // Google Form used for event registration (can be the same tutoring form or a separate one)
+    const EVENT_REGISTER_URL = "https://docs.google.com/forms/d/e/1FAIpQLSe_irymWaJjduh1n5V9N_3BrLPSkRgrChb4AfYmm55lFmyGVQ/viewform";
+
+    const PAGE_SIZE = 3;
+    let allEvents = [];
+    let currentPage = 0;
+
+    const listEl = document.getElementById("events-list");
+    const pagerEl = document.getElementById("event-pager");
+    const pageInfoEl = document.getElementById("events-page-info");
+    const prevBtn = document.getElementById("events-prev-btn");
+    const nextBtn = document.getElementById("events-next-btn");
+    const registerLink = document.getElementById("register-event-link");
+
+    if (registerLink) registerLink.href = EVENT_REGISTER_URL;
+
+    function escapeHtml(str) {
+        return String(str == null ? "" : str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+
+    function renderEvents() {
+        if (!listEl) return;
+        listEl.innerHTML = "";
+
+        if (allEvents.length === 0) {
+            listEl.innerHTML = '<p class="events-empty">No upcoming events right now — check back soon.</p>';
+            pagerEl.style.display = "none";
+            return;
+        }
+
+        const start = currentPage * PAGE_SIZE;
+        const pageItems = allEvents.slice(start, start + PAGE_SIZE);
+
+        pageItems.forEach(function (ev) {
+            const row = document.createElement("div");
+            row.className = "event";
+            row.innerHTML =
+                '<div class="event-date">' +
+                    '<strong>' + escapeHtml(ev.day) + '</strong>' +
+                    '<span>' + escapeHtml(ev.month) + '</span>' +
+                '</div>' +
+                '<div class="event-info">' +
+                    '<span class="event-tag">' + escapeHtml((ev.category || "").toUpperCase()) + '</span>' +
+                    '<h3>' + escapeHtml(ev.title) + '</h3>' +
+                    '<p>' + escapeHtml(ev.description) + '</p>' +
+                '</div>' +
+                '<div class="event-time">' + escapeHtml(ev.timeOrLocation) + '</div>';
+            listEl.appendChild(row);
+        });
+
+        const totalPages = Math.ceil(allEvents.length / PAGE_SIZE);
+        pagerEl.style.display = totalPages > 1 ? "flex" : "none";
+        pageInfoEl.textContent = "Page " + (currentPage + 1) + " of " + totalPages;
+        prevBtn.disabled = currentPage === 0;
+        nextBtn.disabled = currentPage >= totalPages - 1;
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener("click", function () {
+            if (currentPage > 0) {
+                currentPage--;
+                renderEvents();
+            }
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener("click", function () {
+            const totalPages = Math.ceil(allEvents.length / PAGE_SIZE);
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                renderEvents();
+            }
+        });
+    }
+
+    if (listEl) {
+        fetch(EVENTS_API_URL + "?upcomingOnly=true")
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                allEvents = data.events || [];
+                renderEvents();
+            })
+            .catch(function (err) {
+                listEl.innerHTML = '<p class="events-error">Couldn\'t load events right now. Please refresh.</p>';
+                console.error(err);
+            });
+    }
+})();
+</script>
 
 </body>
 </html>
