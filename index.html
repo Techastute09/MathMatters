@@ -49,6 +49,45 @@
             color: rgba(255, 255, 255, 0.6);
             padding: 24px 0;
         }
+
+        /* Nav action buttons — "I'm a Student" / "I'm a Tutor"
+           These are the site's two ACTION entry points, separate from
+           the content nav links (Tutoring / Programs / Events / Resources / Impact). */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 8px;
+        }
+        .nav-button-outline {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 700;
+            border: 1.5px solid currentColor;
+            color: inherit;
+            background: transparent;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .nav-button-outline:hover {
+            opacity: 0.7;
+        }
+        @media (max-width: 900px) {
+            .nav-actions {
+                margin-left: 0;
+                margin-top: 12px;
+                width: 100%;
+            }
+            .nav-actions a {
+                flex: 1;
+                justify-content: center;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 
@@ -81,17 +120,22 @@
 
         <nav class="nav" id="nav">
 
+            <!-- CONTENT: what the site is about -->
             <a href="#tutoring">Tutoring</a>
-            <a href="#tutors">Tutors</a>
             <a href="#programs">Programs</a>
             <a href="#events">Events</a>
-            <a href="#impact">Impact</a>
             <a href="#resources">Resources</a>
-            <a href="#about">About</a>
+            <a href="#impact">Impact</a>
 
-            <a href="#join" class="nav-button">
-                Join Us
-            </a>
+            <!-- ACTION: where the user goes to do something -->
+            <div class="nav-actions">
+                <a href="#" id="cta-student-nav" class="nav-button-outline">
+                    I'm a Student
+                </a>
+                <a href="#" id="cta-tutor-nav" class="nav-button">
+                    I'm a Tutor
+                </a>
+            </div>
 
         </nav>
 
@@ -129,13 +173,13 @@
 
             <div class="hero-buttons">
 
-                <a href="#tutoring" class="button button-dark">
-                    Find a Tutor
+                <a href="#" id="cta-student-hero" class="button button-dark">
+                    I'm a Student
                     <span>→</span>
                 </a>
 
-                <a href="#tutors" class="button button-outline">
-                    Become a Tutor
+                <a href="#" id="cta-tutor-hero" class="button button-outline">
+                    I'm a Tutor
                 </a>
 
             </div>
@@ -348,7 +392,7 @@
 
             </div>
 
-            <a href="#join" class="button button-outline">
+            <a href="#" id="cta-tutor-tutors" class="button button-outline">
                 Apply to Tutor
             </a>
 
@@ -824,8 +868,9 @@
             </h2>
 
             <p>
-                Choose how you want to contribute
-                to the Math Matters community.
+            Whether you're looking for support, ready to volunteer<br>
+            Or simply curious about mathematics<br> 
+            There's a way to get involved.
             </p>
 
         </div>
@@ -833,26 +878,13 @@
 
         <div class="join-buttons">
 
-            <button
-                class="button button-white"
-                onclick="showMessage('Student registration will be connected to your Google Form.')"
-            >
-                I’m a Student
-            </button>
+            <a href="#" id="cta-student-join" class="button button-white">
+                I'm a Student
+            </a>
 
-            <button
-                class="button button-transparent"
-                onclick="showMessage('Tutor applications will be connected to your Tutor application form.')"
-            >
-                I’m a Tutor
-            </button>
-
-            <button
-                class="button button-transparent"
-                onclick="showMessage('Partner inquiries will be connected to your partnership form.')"
-            >
-                Partner With Us
-            </button>
+            <a href="#" id="cta-tutor-join" class="button button-transparent">
+                I'm a Tutor
+            </a>
 
         </div>
 
@@ -905,11 +937,10 @@
 
             <h4>Explore</h4>
 
-            <a href="#tutoring">Tutoring</a>
             <a href="#programs">Programs</a>
             <a href="#events">Events</a>
             <a href="#impact">Impact</a>
-
+            <a href="#resources">Resources</a>
         </div>
 
 
@@ -917,10 +948,9 @@
 
             <h4>Get Involved</h4>
 
-            <a href="#join">Students</a>
-            <a href="#join">Tutors</a>
-            <a href="#join">Partners</a>
-
+            <a href="#tutoring">Students</a>
+            <a href="#tutors">Tutors</a>
+ 
         </div>
 
     </div>
@@ -971,6 +1001,49 @@
 
 
 <script src="js/script.js"></script>
+
+<!-- =========================
+     ACTION ENTRY POINTS
+     "I'm a Student" and "I'm a Tutor" appear in several places
+     (nav, hero, tutors section, join section) but should all point
+     to the SAME two destinations. Edit the two URLs below and every
+     button on the page updates automatically.
+========================= -->
+<script>
+(function () {
+    // Student registration form (used by: nav, hero, join section)
+    const STUDENT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSe_irymWaJjduh1n5V9N_3BrLPSkRgrChb4AfYmm55lFmyGVQ/viewform";
+
+    // Tutor application form (used by: nav, hero, tutors section, join section)
+    // TODO: paste your Tutor Application Google Form link here.
+    const TUTOR_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSe5t9kELBVX0YBabcLnlrq2Z48KOaph4zTiGDZzO8-uLUrrNg/viewform";
+
+    function wire(id, url, fallbackMessage) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (url) {
+            el.href = url;
+            el.target = "_blank";
+            el.rel = "noopener";
+        } else {
+            el.href = "#";
+            el.addEventListener("click", function (e) {
+                e.preventDefault();
+                showMessage(fallbackMessage);
+            });
+        }
+    }
+
+    wire("cta-student-nav", STUDENT_FORM_URL, "Student registration will be connected to your Google Form.");
+    wire("cta-student-hero", STUDENT_FORM_URL, "Student registration will be connected to your Google Form.");
+    wire("cta-student-join", STUDENT_FORM_URL, "Student registration will be connected to your Google Form.");
+
+    wire("cta-tutor-nav", TUTOR_FORM_URL, "Tutor applications will be connected to your Tutor Application form.");
+    wire("cta-tutor-hero", TUTOR_FORM_URL, "Tutor applications will be connected to your Tutor Application form.");
+    wire("cta-tutor-tutors", TUTOR_FORM_URL, "Tutor applications will be connected to your Tutor Application form.");
+    wire("cta-tutor-join", TUTOR_FORM_URL, "Tutor applications will be connected to your Tutor Application form.");
+})();
+</script>
 
 <!-- =========================
      EVENTS: Google Sheet feed + pagination
